@@ -7,61 +7,60 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 
 public class Client extends JFrame {
+    Socket socket = null;
     String host = "127.0.0.1";
     int port = 5000;
 
     public Client() {
-        createPromptGui();
+        createStartUpGui();
         clientConnect(host, port);
-
+        createPromptGui();
     }
 
     private void clientConnect(String host, int port){
-        Socket socket = null;
-        BufferedReader socketReader = null;
-        PrintWriter socketWriter = null;
-
         try {
             socket = new Socket(host, port);
-            socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            socketWriter = new PrintWriter(socket.getOutputStream());
 
-            Scanner scanner = new Scanner(System.in);
-            String line = null;
-
-            while(true) {
-                line = scanner.nextLine();
-
-                socketWriter.println(line);
-                socketWriter.flush();
-
-                System.out.println("Server replied: " + socketReader.readLine());
-            }
+            System.out.println("connected to server");
         }
         catch (IOException e) {
             e.printStackTrace();
         }
-        finally {
-            try {
-                if (socketWriter != null) {
-                    socketWriter.close();
-                }
-                if (socketReader != null) {
-                    socketReader.close();
-                    socket.close();
-                }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+    }
+    private void sendServerMessage(String message) {
+        BufferedReader socketReader = null;
+        PrintWriter socketWriter = null;
+
+        try {
+            socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            socketWriter = new PrintWriter(socket.getOutputStream());
+
+
+            socketWriter.println(message);
+            socketWriter.flush();
+            System.out.println("Server replied: " + socketReader.readLine());
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
+    private void createStartUpGui(){
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
 
+        JFrame frame = new JFrame("Start Window");
+        JLabel label = new JLabel("waiting for connection...");
+        frame.add(label);
+        frame.pack();
+        frame.setVisible(true);
+    }
     private void createPromptGui(){
+        getContentPane().removeAll();
+
         JLabel userLabel;
         JTextField userText;
         JButton loginButton;
@@ -74,7 +73,7 @@ public class Client extends JFrame {
         userLabel = new JLabel("Username:");
         userText = new JTextField(20);
         loginButton = new JButton("Login");
-        loginButton.addActionListener(new loginButtonListener());
+        loginButton.addActionListener(new loginButtonListener((JTextField) userText));
 
         loginPanel = new JPanel(new GridLayout(3, 2));
         loginPanel.add(userLabel);
@@ -91,14 +90,20 @@ public class Client extends JFrame {
     }
     private class loginButtonListener implements ActionListener{
         private boolean authStatus = false;
+        private JTextField userText;
+
+        public loginButtonListener(JTextField userText) {
+            this.userText = userText;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             System.out.println("Login button pressed");
+            sendServerMessage(userText.getText());
 
             //TODO: validate user login with server and database
 
             authStatus = true; //temporary bypass
-
             if(authStatus){
                 createMainGui();
             }
