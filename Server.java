@@ -5,6 +5,7 @@ class Server {
     public static void main(String[] args)
     {
         ServerSocket server = null;
+        int threadID = 0;
 
         try {
             server = new ServerSocket(5000);
@@ -14,7 +15,9 @@ class Server {
 
                 System.out.println("New client connected " + client.getInetAddress().getHostAddress());
 
-                ClientHandler clientSock = new ClientHandler(client);
+                threadID++;
+
+                ClientHandler clientSock = new ClientHandler(client, threadID);
 
                 new Thread(clientSock).start();
             }
@@ -36,10 +39,12 @@ class Server {
 
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
+        int threadID;
 
-        public ClientHandler(Socket socket)
+        public ClientHandler(Socket socket, int threadID)
         {
             this.clientSocket = socket;
+            this.threadID = threadID;
         }
 
         public void run()
@@ -56,9 +61,8 @@ class Server {
 
                 String line;
                 while ((line = socketReader.readLine()) != null) {
-                    System.out.printf(
-                            " Sent from the client: %s\n",
-                            line);
+                    System.out.printf(" Sent from the client: %s\n", line);
+                    socketWriter.println(threadID);
                     socketWriter.println(line);
                 }
             }
