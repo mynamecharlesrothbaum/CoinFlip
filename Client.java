@@ -15,7 +15,7 @@ public class Client extends JFrame {
     int port = 5000;
 
     public Client() {
-        createStartUpGui();
+        createStartGui();
         clientConnect(host, port);
         createPromptGui();
     }
@@ -48,12 +48,11 @@ public class Client extends JFrame {
             e.printStackTrace();
         }
     }
-    private void createStartUpGui(){
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
-
+    private void createStartGui(){
         JFrame frame = new JFrame("Start Window");
         JLabel label = new JLabel("waiting for connection...");
+        setSize(400, 300);
+
         frame.add(label);
         frame.pack();
         frame.setVisible(true);
@@ -81,9 +80,6 @@ public class Client extends JFrame {
         loginPanel.add(new JLabel(""));
         loginPanel.add(loginButton);
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.add(new JLabel("You are logged in!"));
-
         getContentPane().add(loginPanel, BorderLayout.NORTH);
 
         setVisible(true);
@@ -110,14 +106,60 @@ public class Client extends JFrame {
         }
     }
 
-    public void createMainGui(){
+    private void createMainGui(){
         getContentPane().removeAll();
-        JPanel mainPanel = new JPanel();
-        mainPanel.add(new JLabel("You are logged in!"));
 
-        getContentPane().add(mainPanel);
+        setTitle("Coin Flip");
+        setSize(600, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel circlePanel = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.YELLOW);
+                g.fillOval(100, 50, 200, 200);
+            }
+        };
+        add(circlePanel, BorderLayout.CENTER);
+
+        JButton flipButton = new JButton("Flip Coin");
+        add(flipButton, BorderLayout.NORTH);
+
+        JTextField betAmountField = new JTextField(10);
+        JButton confirmBetButton = new JButton("Confirm Bet");
+        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountField));
+        JPanel betPanel = new JPanel(new FlowLayout());
+        betPanel.add(new JLabel("Enter bet amount:"));
+        betPanel.add(betAmountField);
+        betPanel.add(confirmBetButton);
+        add(betPanel, BorderLayout.SOUTH);
+
+        JRadioButton headsRadioButton = new JRadioButton("Heads");
+        JRadioButton tailsRadioButton = new JRadioButton("Tails");
+        ButtonGroup guessButtonGroup = new ButtonGroup();
+        guessButtonGroup.add(headsRadioButton);
+        guessButtonGroup.add(tailsRadioButton);
+        JPanel guessPanel = new JPanel(new GridLayout(2, 1));
+        guessPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        guessPanel.add(new JLabel("Guess:"));
+        guessPanel.add(headsRadioButton);
+        guessPanel.add(tailsRadioButton);
+        add(guessPanel, BorderLayout.WEST);
 
         setVisible(true);
+    }
+    private class confirmBetButtonListener implements ActionListener{
+        JTextField betAmount;
+        private confirmBetButtonListener(JTextField betAmount){
+            this.betAmount = betAmount;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("Confirm bet button pressed");
+            sendServerMessage(betAmount.getText());
+        }
     }
 
     public static void main(String[] args) {
