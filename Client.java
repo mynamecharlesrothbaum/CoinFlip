@@ -11,11 +11,12 @@ import java.util.Scanner;
 
 
 public class Client extends JFrame{
-    private Socket socket;
-    private BufferedReader socketReader;
-    private PrintWriter socketWriter;
-    private Scanner scanner;
-    String line;
+    Socket socket;
+    BufferedReader socketReader;
+    PrintWriter socketWriter;
+
+    String host = "127.0.0.1";
+    int port = 5000;
 
     public Client() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,8 +27,12 @@ public class Client extends JFrame{
 
         setVisible(true);
 
+        clientConnect(host, port);
+    }
+
+    public void clientConnect(String host, int port){
         try {
-            socket = new Socket("127.0.1.1", 5000);
+            socket = new Socket(host, port);
             socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             socketWriter = new PrintWriter(socket.getOutputStream());
 
@@ -47,6 +52,7 @@ public class Client extends JFrame{
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {
         new Client();
     }
