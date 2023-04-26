@@ -40,28 +40,24 @@ public class Client extends JFrame {
         PrintWriter socketWriter = null;
 
         try {
-            socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             socketWriter = new PrintWriter(socket.getOutputStream());
 
 
             socketWriter.println(message);
             socketWriter.flush();
-            System.out.println("My ID: " + socketReader.readLine());
-            System.out.println("Server replied: " + socketReader.readLine());
-
         }
         catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private void createStartGui(){
-        JFrame frame = new JFrame("Start Window");
-        JLabel label = new JLabel("waiting for connection...");
-        setSize(400, 300);
-
-        frame.add(label);
-        frame.pack();
-        frame.setVisible(true);
+    private String getServerMessage(BufferedReader socketReader){
+        try {
+            return socketReader.readLine();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return("Error: no message received from server.");
     }
     private void createPromptGui(){
         getContentPane().removeAll();
@@ -93,6 +89,7 @@ public class Client extends JFrame {
     private class loginButtonListener implements ActionListener{
         private boolean authStatus = false;
         private JTextField userText;
+        private String signal = "auth";
 
         public loginButtonListener(JTextField userText) {
             this.userText = userText;
@@ -101,18 +98,31 @@ public class Client extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             System.out.println("Login button pressed");
+
+            sendServerMessage(signal);
             sendServerMessage(userText.getText());
 
             //TODO: validate user login with server and database
 
             authStatus = true; //temporary bypass
+
+            BufferedReader socketReader = null;
             if(authStatus){
-                createMainGui();
+                try {
+                    socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String userID = socketReader.readLine();
+                    String username = socketReader.readLine();
+                    String balance = socketReader.readLine();
+
+                    createMainGui(userID, username, balance);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
 
-    private void createMainGui(){
+    private void createMainGui(String userID, String username, String balance){
         getContentPane().removeAll();
 
         setTitle("Coin Flip");
@@ -131,7 +141,7 @@ public class Client extends JFrame {
         leaderboardLabel.setHorizontalAlignment(JLabel.LEFT);
         add(leaderboardLabel, BorderLayout.NORTH);
 
-        userInfoLabel = new JLabel("User #1   Account Balance: $100");
+        userInfoLabel = new JLabel("User #"+ userID + " Account Balance: $"+ balance);
         userInfoLabel.setHorizontalAlignment(JLabel.RIGHT);
         add(userInfoLabel, BorderLayout.NORTH);
 
