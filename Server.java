@@ -84,6 +84,14 @@ class Server {
 
                         }
                     }
+                    if(signal.equals("flip")){
+                        if(flipCoin()){
+                            socketWriter.println("heads");
+                        }
+                        else{
+                            socketWriter.println("tails");
+                        }
+                    }
                 }
             }
             catch (IOException e) {
@@ -103,6 +111,15 @@ class Server {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+    public static boolean flipCoin(){
+        double randomNumber = Math.random();
+
+        if (randomNumber < 0.5) {
+            return true;
+        } else {
+            return false;
         }
     }
     public static class UserMap{
@@ -130,11 +147,9 @@ class Server {
             this.username = username;
             this.accountBalance = accountBalance;
         }
-
         public String getUserName() {
             return username;
         }
-
         public String getAccountBalance() {
             return accountBalance;
         }

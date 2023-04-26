@@ -148,6 +148,7 @@ public class Client extends JFrame {
         flipCoinButton = new JButton("Flip Coin");
         flipCoinButton.setPreferredSize(new Dimension(600, 200));
         add(flipCoinButton, BorderLayout.CENTER);
+        flipCoinButton.addActionListener(new flipCoinButtonListener());
 
         headsRadioButton = new JRadioButton("Heads");
         tailsRadioButton = new JRadioButton("Tails");
@@ -179,6 +180,28 @@ public class Client extends JFrame {
         public void actionPerformed(ActionEvent e) {
             System.out.println("Confirm bet button pressed");
             sendServerMessage(betAmount.getText());
+        }
+    }
+    private class flipCoinButtonListener implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            sendServerMessage("flip");
+
+            BufferedReader socketReader = null;
+
+            try {
+                socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                if((socketReader.readLine()).equals("heads")){
+                    System.out.println("Heads!");
+                }
+                else{
+                    System.out.println("Tails!");
+                }
+            }
+            catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
