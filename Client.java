@@ -98,26 +98,30 @@ public class Client extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             System.out.println("Login button pressed");
+            String username = userText.getText();
 
             sendServerMessage(signal);
-            sendServerMessage(userText.getText());
+            sendServerMessage(username);
 
             //TODO: validate user login with server and database
 
-            authStatus = true; //temporary bypass
+            authStatus = false; //temporary bypass
 
             BufferedReader socketReader = null;
             if(authStatus){
                 try {
                     socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String userID = socketReader.readLine();
-                    String username = socketReader.readLine();
+                    String name = socketReader.readLine();
                     String balance = socketReader.readLine();
 
-                    createMainGui(userID, username, balance);
+                    createMainGui(userID, name, balance);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+            }
+            else{
+                createNewUserPrompt(username);
             }
         }
     }
@@ -141,7 +145,7 @@ public class Client extends JFrame {
         leaderboardLabel.setHorizontalAlignment(JLabel.LEFT);
         add(leaderboardLabel, BorderLayout.NORTH);
 
-        userInfoLabel = new JLabel("User #"+ userID + " Account Balance: $"+ balance);
+        userInfoLabel = new JLabel("User #"+ userID + " Name: " + username + " Account Balance: $"+ balance);
         userInfoLabel.setHorizontalAlignment(JLabel.RIGHT);
         add(userInfoLabel, BorderLayout.NORTH);
 
@@ -171,6 +175,43 @@ public class Client extends JFrame {
         pack();
         setVisible(true);
     }
+
+    private void createNewUserPrompt(String username){
+        getContentPane().removeAll();
+
+        setTitle("Coin Flip");
+        setSize(300, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JLabel userLabel;
+        JButton newAcctButton;
+        JPanel loginPanel;
+
+        userLabel = new JLabel("User not found. Create a new user account?");
+        newAcctButton = new JButton("Create");
+        newAcctButton.addActionListener(new newAcctButtonListener(username));
+
+        loginPanel = new JPanel(new GridLayout(3, 2));
+        loginPanel.add(userLabel);
+        loginPanel.add(new JLabel(""));
+        loginPanel.add(newAcctButton);
+
+        getContentPane().add(loginPanel, BorderLayout.NORTH);
+
+        setVisible(true);
+    }
+    private class newAcctButtonListener implements ActionListener{
+        String name;
+        private newAcctButtonListener(String username){
+            this.name = username;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            sendServerMessage("create");
+            sendServerMessage(name);
+        }
+    }
+
     private class confirmBetButtonListener implements ActionListener{
         JTextField betAmount;
         private confirmBetButtonListener(JTextField betAmount){
