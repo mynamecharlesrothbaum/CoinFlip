@@ -167,10 +167,18 @@ public class Client extends JFrame {
         betAmountTextField = new JTextField();
         bottomLeftPanel.add(betAmountTextField);
 
+        String guess;
+        if(headsRadioButton.isSelected()){
+            guess = "heads";
+        }
+        else{
+            guess = "tails";
+        }
+
         confirmBetButton = new JButton("Confirm Bet");
         bottomLeftPanel.add(confirmBetButton);
         add(bottomLeftPanel, BorderLayout.SOUTH);
-        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username));
+        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username, guess));
 
         pack();
         setVisible(true);
@@ -215,9 +223,11 @@ public class Client extends JFrame {
     private class confirmBetButtonListener implements ActionListener{
         JTextField betAmount;
         String name;
-        private confirmBetButtonListener(JTextField betAmount, String username){
+        String guess;
+        private confirmBetButtonListener(JTextField betAmount, String username, String guess){
             this.betAmount = betAmount;
             this.name = username;
+            this.guess = guess;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -235,7 +245,6 @@ public class Client extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             sendServerMessage("flip");
-            sendServerMessage(name);
 
             BufferedReader socketReader = null;
 
