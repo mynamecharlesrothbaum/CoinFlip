@@ -152,7 +152,7 @@ public class Client extends JFrame {
         flipCoinButton = new JButton("Flip Coin");
         flipCoinButton.setPreferredSize(new Dimension(600, 200));
         add(flipCoinButton, BorderLayout.CENTER);
-        flipCoinButton.addActionListener(new flipCoinButtonListener());
+        flipCoinButton.addActionListener(new flipCoinButtonListener(username));
 
         headsRadioButton = new JRadioButton("Heads");
         tailsRadioButton = new JRadioButton("Tails");
@@ -170,7 +170,7 @@ public class Client extends JFrame {
         confirmBetButton = new JButton("Confirm Bet");
         bottomLeftPanel.add(confirmBetButton);
         add(bottomLeftPanel, BorderLayout.SOUTH);
-        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField));
+        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username));
 
         pack();
         setVisible(true);
@@ -214,19 +214,28 @@ public class Client extends JFrame {
 
     private class confirmBetButtonListener implements ActionListener{
         JTextField betAmount;
-        private confirmBetButtonListener(JTextField betAmount){
+        String name;
+        private confirmBetButtonListener(JTextField betAmount, String username){
             this.betAmount = betAmount;
+            this.name = username;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
             System.out.println("Confirm bet button pressed");
+            sendServerMessage("confirm bet");
+            sendServerMessage(name);
             sendServerMessage(betAmount.getText());
         }
     }
     private class flipCoinButtonListener implements ActionListener{
+        String name;
+        private flipCoinButtonListener(String username){
+            this.name = username;
+        }
         @Override
         public void actionPerformed(ActionEvent e) {
             sendServerMessage("flip");
+            sendServerMessage(name);
 
             BufferedReader socketReader = null;
 
