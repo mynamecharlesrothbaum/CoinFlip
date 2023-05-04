@@ -194,6 +194,7 @@ public class Client extends JFrame {
 
             sendServerMessage("leaderboard");
             try {
+                socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 leader1 = socketReader.readLine();
                 leader2 = socketReader.readLine();
                 leader3 = socketReader.readLine();
