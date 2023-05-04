@@ -15,26 +15,25 @@ public class Client extends JFrame {
     int port = 5000;
 
     public Client() {
-        if(clientConnect(host, port)) {
+        if (clientConnect(host, port)) {
             createPromptGui();
-        }
-        else{
+        } else {
             System.out.println("Error: could not connect to server");
         }
     }
 
-    private boolean clientConnect(String host, int port){
+    private boolean clientConnect(String host, int port) {
         try {
             socket = new Socket(host, port);
 
             System.out.println("connected to server");
             return true;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     private void sendServerMessage(String message) {
         BufferedReader socketReader = null;
         PrintWriter socketWriter = null;
@@ -45,21 +44,21 @@ public class Client extends JFrame {
 
             socketWriter.println(message);
             socketWriter.flush();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private String getServerMessage(BufferedReader socketReader){
+
+    private String getServerMessage(BufferedReader socketReader) {
         try {
             return socketReader.readLine();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return("Error: no message received from server.");
+        return ("Error: no message received from server.");
     }
-    private void createPromptGui(){
+
+    private void createPromptGui() {
         getContentPane().removeAll();
 
         JLabel userLabel;
@@ -86,7 +85,8 @@ public class Client extends JFrame {
 
         setVisible(true);
     }
-    private class loginButtonListener implements ActionListener{
+
+    private class loginButtonListener implements ActionListener {
         private boolean authStatus = false;
         private JTextField userText;
         private String signal = "auth";
@@ -109,24 +109,22 @@ public class Client extends JFrame {
             try {
                 socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                if(socketReader.readLine().equals("true")) {
+                if (socketReader.readLine().equals("true")) {
                     String name = socketReader.readLine();
                     String balance = socketReader.readLine();
 
                     createMainGui(name, balance);
-                }
-                else{
+                } else {
                     createNewUserPrompt(username);
                 }
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
     }
 
 
-    private void createMainGui(String username, String balance){
+    private void createMainGui(String username, String balance) {
         getContentPane().removeAll();
 
         setTitle("Coin Flip");
@@ -147,7 +145,7 @@ public class Client extends JFrame {
         topPanel.add(leaderboardLabel, BorderLayout.WEST);
         add(topPanel, BorderLayout.NORTH);
 
-        userInfoLabel = new JLabel( " Name: " + username + " Account Balance: $" + balance);
+        userInfoLabel = new JLabel(" Name: " + username + " Account Balance: $" + balance);
         userInfoLabel.setHorizontalAlignment(JLabel.CENTER);
         add(userInfoLabel, BorderLayout.CENTER);
 
@@ -169,25 +167,17 @@ public class Client extends JFrame {
         betAmountTextField = new JTextField();
         bottomLeftPanel.add(betAmountTextField);
 
-        String guess;
-        if(headsRadioButton.isSelected()){
-            guess = "heads";
-        }
-        else{
-            guess = "tails";
-        }
-
         confirmBetButton = new JButton("Confirm Bet");
         bottomLeftPanel.add(confirmBetButton);
         add(bottomLeftPanel, BorderLayout.EAST);
-        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username, guess));
+        confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username, headsRadioButton));
 
         pack();
         setVisible(true);
     }
 
 
-    private void updateLeaderboard(JLabel leaderBoardLabel){
+    private void updateLeaderboard(JLabel leaderBoardLabel) {
         BufferedReader socketReader = null;
         String leader1, leader2, leader3, leader1Bal, leader2Bal, leader3Bal;
 
@@ -202,13 +192,12 @@ public class Client extends JFrame {
             leader3Bal = socketReader.readLine();
 
             leaderBoardLabel.setText("Leaderboard " + leader1 + " " + leader1Bal + "||" + " " + leader2Bal + leader2 + "||" + leader3 + " " + leader3Bal);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void createNewUserPrompt(String username){
+    private void createNewUserPrompt(String username) {
         getContentPane().removeAll();
 
         setTitle("Coin Flip");
@@ -232,11 +221,14 @@ public class Client extends JFrame {
 
         setVisible(true);
     }
-    private class newAcctButtonListener implements ActionListener{
+
+    private class newAcctButtonListener implements ActionListener {
         String name;
-        private newAcctButtonListener(String username){
+
+        private newAcctButtonListener(String username) {
             this.name = username;
         }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             sendServerMessage("create");
@@ -245,15 +237,22 @@ public class Client extends JFrame {
         }
     }
 
-    private class confirmBetButtonListener implements ActionListener{
+    private class confirmBetButtonListener implements ActionListener {
         JTextField betAmount;
         String name;
         String guess;
-        private confirmBetButtonListener(JTextField betAmount, String username, String guess){
+
+        private confirmBetButtonListener(JTextField betAmount, String username, JRadioButton headsRadioButton) {
+            if (headsRadioButton.isSelected()) {
+                guess = "heads";
+            } else {
+                guess = "tails";
+            }
+
             this.betAmount = betAmount;
             this.name = username;
-            this.guess = guess;
         }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             String betAmountString = betAmount.getText();
@@ -274,15 +273,18 @@ public class Client extends JFrame {
             }
         }
     }
-    private class flipCoinButtonListener implements ActionListener{
+
+    private class flipCoinButtonListener implements ActionListener {
         String name;
         JLabel textField;
         JLabel userInfoLabel;
-        private flipCoinButtonListener(String username, JLabel leaderBoardLabel, JLabel userInfoLabel){
+
+        private flipCoinButtonListener(String username, JLabel leaderBoardLabel, JLabel userInfoLabel) {
             this.name = username;
             this.textField = leaderBoardLabel;
             this.userInfoLabel = userInfoLabel;
         }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             sendServerMessage("flip");
@@ -292,10 +294,9 @@ public class Client extends JFrame {
             try {
                 socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                if((socketReader.readLine()).equals("heads")){
+                if ((socketReader.readLine()).equals("heads")) {
                     System.out.println("Heads!");
-                }
-                else{
+                } else {
                     System.out.println("Tails!");
                 }
 
@@ -303,8 +304,7 @@ public class Client extends JFrame {
                 userInfoLabel.setText(" Name: " + name + " Account Balance: $" + newBal);
 
                 updateLeaderboard(textField);
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
