@@ -141,7 +141,7 @@ public class Client extends JFrame {
         JLabel leaderboardLabel;
         JButton confirmBetButton;
 
-        leaderboardLabel = new JLabel("Leaderboard: 1. UserA 2. UserB 3. UserC");
+        leaderboardLabel = new JLabel("Leaderboard:");
         leaderboardLabel.setHorizontalAlignment(JLabel.RIGHT);
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(leaderboardLabel, BorderLayout.WEST);
@@ -189,16 +189,19 @@ public class Client extends JFrame {
 
     private void updateLeaderboard(JLabel leaderBoardLabel){
         BufferedReader socketReader = null;
-        String leader1, leader2, leader3;
+        String leader1, leader2, leader3, leader1Bal, leader2Bal, leader3Bal;
 
             sendServerMessage("leaderboard");
             try {
                 socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 leader1 = socketReader.readLine();
+                leader1Bal = socketReader.readLine();
                 leader2 = socketReader.readLine();
+                leader2Bal = socketReader.readLine();
                 leader3 = socketReader.readLine();
+                leader3Bal = socketReader.readLine();
 
-                leaderBoardLabel.setText(leader1 + "\n" + leader2 + "\n" + leader3);
+                leaderBoardLabel.setText("Leaderboard " + leader1 + " " + leader1Bal + "||" + " " + leader2Bal + leader2 + "||" + leader3 + " " + leader3Bal);
             }
             catch (IOException e) {
                 e.printStackTrace();
