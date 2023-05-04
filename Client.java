@@ -99,32 +99,33 @@ public class Client extends JFrame {
         public void actionPerformed(ActionEvent e) {
             System.out.println("Login button pressed");
             String username = userText.getText();
+            BufferedReader socketReader = null;
 
             sendServerMessage(signal);
             sendServerMessage(username);
 
             //TODO: validate user login with server and database
 
-            authStatus = false; //temporary bypass
-
-            BufferedReader socketReader = null;
-            if(authStatus){
-                try {
+            try {
                     socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String userID = socketReader.readLine();
-                    String name = socketReader.readLine();
-                    String balance = socketReader.readLine();
 
-                    createMainGui(userID, name, balance);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                    if(socketReader.readLine().equals("true")) {
+                        String userID = socketReader.readLine();
+                        String name = socketReader.readLine();
+                        String balance = socketReader.readLine();
+
+                        createMainGui(userID, name, balance);
+                    }
+                    else{
+                        createNewUserPrompt(username);
+                    }
             }
-            else{
-                createNewUserPrompt(username);
+            catch (IOException ex) {
+                    ex.printStackTrace();
             }
         }
     }
+
 
     private void createMainGui(String userID, String username, String balance){
         getContentPane().removeAll();
@@ -133,26 +134,28 @@ public class Client extends JFrame {
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel leaderboardLabel;
         JLabel userInfoLabel;
         JButton flipCoinButton;
         JRadioButton headsRadioButton;
         JRadioButton tailsRadioButton;
         JTextField betAmountTextField;
+        JLabel leaderboardLabel;
         JButton confirmBetButton;
 
         leaderboardLabel = new JLabel("Leaderboard: 1. UserA 2. UserB 3. UserC");
-        leaderboardLabel.setHorizontalAlignment(JLabel.LEFT);
-        add(leaderboardLabel, BorderLayout.NORTH);
+        leaderboardLabel.setHorizontalAlignment(JLabel.RIGHT);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(leaderboardLabel, BorderLayout.WEST);
+        add(topPanel, BorderLayout.NORTH);
 
-        userInfoLabel = new JLabel("User #"+ userID + " Name: " + username + " Account Balance: $"+ balance);
-        userInfoLabel.setHorizontalAlignment(JLabel.RIGHT);
-        add(userInfoLabel, BorderLayout.NORTH);
+        userInfoLabel = new JLabel("User #" + userID + " Name: " + username + " Account Balance: $" + balance);
+        userInfoLabel.setHorizontalAlignment(JLabel.CENTER);
+        add(userInfoLabel, BorderLayout.CENTER);
 
         flipCoinButton = new JButton("Flip Coin");
         flipCoinButton.setPreferredSize(new Dimension(600, 200));
-        add(flipCoinButton, BorderLayout.CENTER);
-        flipCoinButton.addActionListener(new flipCoinButtonListener(username));
+        add(flipCoinButton, BorderLayout.SOUTH);
+        flipCoinButton.addActionListener(new flipCoinButtonListener(username, leaderboardLabel));
 
         headsRadioButton = new JRadioButton("Heads");
         tailsRadioButton = new JRadioButton("Tails");
@@ -177,11 +180,29 @@ public class Client extends JFrame {
 
         confirmBetButton = new JButton("Confirm Bet");
         bottomLeftPanel.add(confirmBetButton);
-        add(bottomLeftPanel, BorderLayout.SOUTH);
+        add(bottomLeftPanel, BorderLayout.EAST);
         confirmBetButton.addActionListener(new confirmBetButtonListener((JTextField) betAmountTextField, username, guess));
 
         pack();
         setVisible(true);
+    }
+
+
+    private void updateLeaderboard(JLabel leaderBoardLabel){
+        BufferedReader socketReader = null;
+        String leader1, leader2, leader3;
+
+            sendServerMessage("leaderboard");
+            try {
+                leader1 = socketReader.readLine();
+                leader2 = socketReader.readLine();
+                leader3 = socketReader.readLine();
+
+                leaderBoardLabel.setText(leader1 + "\n" + leader2 + "\n" + leader3);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
     }
 
     private void createNewUserPrompt(String username){
@@ -234,13 +255,16 @@ public class Client extends JFrame {
             System.out.println("Confirm bet button pressed");
             sendServerMessage("confirm bet");
             sendServerMessage(name);
+            sendServerMessage(guess);
             sendServerMessage(betAmount.getText());
         }
     }
     private class flipCoinButtonListener implements ActionListener{
         String name;
-        private flipCoinButtonListener(String username){
+        JLabel textField = null;
+        private flipCoinButtonListener(String username, JLabel leaderBoardLabel){
             this.name = username;
+            this.textField = leaderBoardLabel;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -257,6 +281,7 @@ public class Client extends JFrame {
                 else{
                     System.out.println("Tails!");
                 }
+                updateLeaderboard(textField);
             }
             catch (IOException ex) {
                 throw new RuntimeException(ex);
