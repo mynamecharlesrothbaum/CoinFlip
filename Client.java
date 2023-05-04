@@ -107,20 +107,20 @@ public class Client extends JFrame {
             //TODO: validate user login with server and database
 
             try {
-                    socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                    if(socketReader.readLine().equals("true")) {
-                        String name = socketReader.readLine();
-                        String balance = socketReader.readLine();
+                if(socketReader.readLine().equals("true")) {
+                    String name = socketReader.readLine();
+                    String balance = socketReader.readLine();
 
-                        createMainGui(name, balance);
-                    }
-                    else{
-                        createNewUserPrompt(username);
-                    }
+                    createMainGui(name, balance);
+                }
+                else{
+                    createNewUserPrompt(username);
+                }
             }
             catch (IOException ex) {
-                    ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
     }
@@ -191,21 +191,21 @@ public class Client extends JFrame {
         BufferedReader socketReader = null;
         String leader1, leader2, leader3, leader1Bal, leader2Bal, leader3Bal;
 
-            sendServerMessage("leaderboard");
-            try {
-                socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                leader1 = socketReader.readLine();
-                leader1Bal = socketReader.readLine();
-                leader2 = socketReader.readLine();
-                leader2Bal = socketReader.readLine();
-                leader3 = socketReader.readLine();
-                leader3Bal = socketReader.readLine();
+        sendServerMessage("leaderboard");
+        try {
+            socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            leader1 = socketReader.readLine();
+            leader1Bal = socketReader.readLine();
+            leader2 = socketReader.readLine();
+            leader2Bal = socketReader.readLine();
+            leader3 = socketReader.readLine();
+            leader3Bal = socketReader.readLine();
 
-                leaderBoardLabel.setText("Leaderboard " + leader1 + " " + leader1Bal + "||" + " " + leader2Bal + leader2 + "||" + leader3 + " " + leader3Bal);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+            leaderBoardLabel.setText("Leaderboard " + leader1 + " " + leader1Bal + "||" + " " + leader2Bal + leader2 + "||" + leader3 + " " + leader3Bal);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createNewUserPrompt(String username){
@@ -256,11 +256,22 @@ public class Client extends JFrame {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
+            String betAmountString = betAmount.getText();
+            ;
             System.out.println("Confirm bet button pressed");
-            sendServerMessage("confirm bet");
-            sendServerMessage(name);
-            sendServerMessage(guess);
-            sendServerMessage(betAmount.getText());
+            if (betAmountString.matches("\\d+")) {
+                sendServerMessage("confirm bet");
+                sendServerMessage(name);
+                sendServerMessage(guess);
+                sendServerMessage(betAmount.getText());
+            } else {
+                betAmountString = "0";
+                sendServerMessage("confirm bet");
+                sendServerMessage(name);
+                sendServerMessage(guess);
+                sendServerMessage(betAmountString);
+
+            }
         }
     }
     private class flipCoinButtonListener implements ActionListener{
