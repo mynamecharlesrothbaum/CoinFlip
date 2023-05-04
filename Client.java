@@ -114,7 +114,7 @@ public class Client extends JFrame {
                         String name = socketReader.readLine();
                         String balance = socketReader.readLine();
 
-                        createMainGui(userID, name, balance);
+                        createMainGui(name, balance);
                     }
                     else{
                         createNewUserPrompt(username);
@@ -127,7 +127,7 @@ public class Client extends JFrame {
     }
 
 
-    private void createMainGui(String userID, String username, String balance){
+    private void createMainGui(String username, String balance){
         getContentPane().removeAll();
 
         setTitle("Coin Flip");
@@ -148,7 +148,7 @@ public class Client extends JFrame {
         topPanel.add(leaderboardLabel, BorderLayout.WEST);
         add(topPanel, BorderLayout.NORTH);
 
-        userInfoLabel = new JLabel("User #" + userID + " Name: " + username + " Account Balance: $" + balance);
+        userInfoLabel = new JLabel( " Name: " + username + " Account Balance: $" + balance);
         userInfoLabel.setHorizontalAlignment(JLabel.CENTER);
         add(userInfoLabel, BorderLayout.CENTER);
 
@@ -238,6 +238,7 @@ public class Client extends JFrame {
         public void actionPerformed(ActionEvent e) {
             sendServerMessage("create");
             sendServerMessage(name);
+            createMainGui(name, "1000");
         }
     }
 
