@@ -108,20 +108,24 @@ class Server {
                             accountBal = String.valueOf(userDatabase.getBalance(userDatabase.getUserID(username)));
                             foundUser = "true";
 
-                            socketWriter.println(foundUser);
+                            sendClientMessage(foundUser);
                             userMap.addUser(threadID, new UserInfo(username, accountBal));
                             socketWriter.println(threadID);
                             socketWriter.println(username);
                             socketWriter.println(accountBal);
                         } else {
-                            userDatabase.createUser(username, 10000);
-                            accountBal = "10000";
-
-                            userMap.addUser(threadID, new UserInfo(username, accountBal));
-                            socketWriter.println(threadID);
-                            socketWriter.println(username);
-                            socketWriter.println(accountBal);
+                            sendClientMessage(foundUser);
                         }
+                    }
+                    if (signal.equals("create")){
+                        username = socketReader.readLine();
+                        userDatabase.createUser(username, 10000);
+                        accountBal = "10000";
+
+                        userMap.addUser(threadID, new UserInfo(username, accountBal));
+                        socketWriter.println(threadID);
+                        socketWriter.println(username);
+                        socketWriter.println(accountBal);
                     }
                     if(signal.equals("confirm bet")){
                         betUsername = socketReader.readLine();
