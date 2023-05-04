@@ -110,7 +110,6 @@ class Server {
 
                             sendClientMessage(foundUser);
                             userMap.addUser(threadID, new UserInfo(username, accountBal));
-                            socketWriter.println(threadID);
                             socketWriter.println(username);
                             socketWriter.println(accountBal);
                         } else {
@@ -123,7 +122,6 @@ class Server {
                         accountBal = "10000";
 
                         userMap.addUser(threadID, new UserInfo(username, accountBal));
-                        socketWriter.println(threadID);
                         socketWriter.println(username);
                         socketWriter.println(accountBal);
                     }
@@ -140,11 +138,13 @@ class Server {
                             if(guess.equals("heads")) {
                                 int plusBalance = currentBal + betAmt;
                                 userDatabase.updateBalance(betUserId, plusBalance);
-                                socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
+                                socketWriter.println(plusBalance);
+                                //socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
                             } else {
                                 int minusBalance = currentBal - betAmt;
                                 userDatabase.updateBalance(betUserId, minusBalance);
-                                socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
+                                socketWriter.println(minusBalance);
+                                //socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
                             }
 
                         }
@@ -153,11 +153,13 @@ class Server {
                             if(guess.equals("tails")) {
                                 int plusBalance = currentBal + betAmt;
                                 userDatabase.updateBalance(betUserId, plusBalance);
-                                socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
+                                socketWriter.println(plusBalance);
+                                ///socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
                             } else {
                                 int minusBalance = currentBal - betAmt;
                                 userDatabase.updateBalance(betUserId, minusBalance);
-                                socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
+                                socketWriter.println(minusBalance);
+                                //socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
                             }
                         }
                     }
