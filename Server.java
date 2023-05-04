@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 class Server {
@@ -40,7 +41,7 @@ class Server {
         }
     }
 
-    private static class ClientHandler implements Runnable {
+    private static class ClientHandler implements Runnable  {
         private final Socket clientSocket;
         int threadID;
 
@@ -51,11 +52,40 @@ class Server {
 
         }
 
+        public boolean foundUser(String username){
+            UserDatabase userDatabase = new UserDatabase();
+            int userID = userDatabase.getUserID(username);
+            if(userID == 0){
+                return false;
+            } else {
+                return true;
+            }
+        }
+        private void sendClientMessage(String message) {
+            BufferedReader socketReader = null;
+            PrintWriter socketWriter = null;
+
+            try {
+                socketWriter = new PrintWriter(clientSocket.getOutputStream());
+
+
+                socketWriter.println(message);
+                socketWriter.flush();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         public void run()
         {
+            UserDatabase userDatabase = new UserDatabase();
             PrintWriter socketWriter = null;
             BufferedReader socketReader = null;
             UserMap userMap = new UserMap();
+            int betAmt = 0;
+            String betUsername = "";
+            String guess = "";
             try {
                 socketWriter = new PrintWriter(
                         clientSocket.getOutputStream(), true);
@@ -66,30 +96,89 @@ class Server {
 
                 String signal, username;
                 String accountBal = "100";
+                String foundUser = "false";
 
                 while ((signal = socketReader.readLine()) != null) {
                     System.out.printf(" Sent from the client: %s\n", signal);
                     if(signal.equals("auth")){
                         System.out.println("Server: authenticating...");
-                        if(true){ //TODO: pull database and authenticate existing user
-                            username = socketReader.readLine();
+                        username = socketReader.readLine();
+                        if (foundUser(username)) {
                             System.out.println(username);
+                            accountBal = String.valueOf(userDatabase.getBalance(userDatabase.getUserID(username)));
+                            foundUser = "true";
 
+                            sendClientMessage(foundUser);
                             userMap.addUser(threadID, new UserInfo(username, accountBal));
                             socketWriter.println(threadID);
                             socketWriter.println(username);
                             socketWriter.println(accountBal);
-                        }
-                        else{ //TODO: create a new user db entry
-
+                        } else {
+                            sendClientMessage(foundUser);
                         }
                     }
+                    if (signal.equals("create")){
+                        username = socketReader.readLine();
+                        userDatabase.createUser(username, 10000);
+                        accountBal = "10000";
+
+                        userMap.addUser(threadID, new UserInfo(username, accountBal));
+                        socketWriter.println(threadID);
+                        socketWriter.println(username);
+                        socketWriter.println(accountBal);
+                    }
+                    if(signal.equals("confirm bet")){
+                        betUsername = socketReader.readLine();
+                        guess = socketReader.readLine();
+                        betAmt = Integer.valueOf(socketReader.readLine());
+                    }
                     if(signal.equals("flip")){
+                        int betUserId = userDatabase.getUserID(betUsername);
+                        int currentBal = userDatabase.getBalance(betUserId);
                         if(flipCoin()){
                             socketWriter.println("heads");
+                            if(guess.equals("heads")) {
+                                int plusBalance = currentBal + betAmt;
+                                userDatabase.updateBalance(betUserId, plusBalance);
+                                socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
+                            } else {
+                                int minusBalance = currentBal - betAmt;
+                                userDatabase.updateBalance(betUserId, minusBalance);
+                                socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
+                            }
+
                         }
                         else{
                             socketWriter.println("tails");
+                            if(guess.equals("tails")) {
+                                int plusBalance = currentBal + betAmt;
+                                userDatabase.updateBalance(betUserId, plusBalance);
+                                socketWriter.println("You won " + String.valueOf(betAmt) + "! :)");
+                            } else {
+                                int minusBalance = currentBal - betAmt;
+                                userDatabase.updateBalance(betUserId, minusBalance);
+                                socketWriter.println("You Loss " + String.valueOf(betAmt) + ". :(");
+                            }
+                        }
+                    }
+
+                    if(signal.equals("leaderboard")){
+                        ArrayList<String> leaderboardUser = new ArrayList<String>();
+                        ArrayList<Integer> leaderboardBalance = new ArrayList<Integer>();
+
+                        leaderboardUser = userDatabase.leaderboard();
+
+                        for(int i = 0; i < leaderboardUser.size(); i++){
+                            String temp = leaderboardUser.get(i);
+                            int tempId = userDatabase.getUserID(temp);
+                            leaderboardBalance.add(userDatabase.getBalance(tempId));
+                        }
+
+                        for(int j = 0; j < leaderboardBalance.size(); j++){
+                            String tempUser = leaderboardUser.get(j);
+                            String tempBal = String.valueOf(leaderboardBalance.get(j));
+                            socketWriter.println(tempUser);
+                            socketWriter.println(tempBal);
                         }
                     }
                 }
