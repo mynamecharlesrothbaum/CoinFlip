@@ -110,7 +110,6 @@ public class Client extends JFrame {
                     socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                     if(socketReader.readLine().equals("true")) {
-                        String userID = socketReader.readLine();
                         String name = socketReader.readLine();
                         String balance = socketReader.readLine();
 
@@ -155,7 +154,7 @@ public class Client extends JFrame {
         flipCoinButton = new JButton("Flip Coin");
         flipCoinButton.setPreferredSize(new Dimension(600, 200));
         add(flipCoinButton, BorderLayout.SOUTH);
-        flipCoinButton.addActionListener(new flipCoinButtonListener(username, leaderboardLabel));
+        flipCoinButton.addActionListener(new flipCoinButtonListener(username, leaderboardLabel, userInfoLabel));
 
         headsRadioButton = new JRadioButton("Heads");
         tailsRadioButton = new JRadioButton("Tails");
@@ -263,10 +262,12 @@ public class Client extends JFrame {
     }
     private class flipCoinButtonListener implements ActionListener{
         String name;
-        JLabel textField = null;
-        private flipCoinButtonListener(String username, JLabel leaderBoardLabel){
+        JLabel textField;
+        JLabel userInfoLabel;
+        private flipCoinButtonListener(String username, JLabel leaderBoardLabel, JLabel userInfoLabel){
             this.name = username;
             this.textField = leaderBoardLabel;
+            this.userInfoLabel = userInfoLabel;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -283,6 +284,10 @@ public class Client extends JFrame {
                 else{
                     System.out.println("Tails!");
                 }
+
+                String newBal = socketReader.readLine();
+                userInfoLabel.setText(" Name: " + name + " Account Balance: $" + newBal);
+
                 updateLeaderboard(textField);
             }
             catch (IOException ex) {
