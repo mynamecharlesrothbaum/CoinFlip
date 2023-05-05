@@ -61,6 +61,15 @@ class Server {
                 return true;
             }
         }
+        public boolean userOnline(String username){
+            UserDatabase userDatabase = new UserDatabase();
+            int userID = userDatabase.getUserID(username);
+            if(userID != 0){
+                return true;
+            } else {
+                return false;
+            }
+        }
         private void sendClientMessage(String message) {
             BufferedReader socketReader = null;
             PrintWriter socketWriter = null;
@@ -103,7 +112,7 @@ class Server {
                     if(signal.equals("auth")){
                         System.out.println("Server: authenticating...");
                         username = socketReader.readLine();
-                        if (foundUser(username)) {
+                        if (foundUser(username)&&(!userOnline(username))) {
                             System.out.println(username);
                             accountBal = String.valueOf(userDatabase.getBalance(userDatabase.getUserID(username)));
                             foundUser = "true";
